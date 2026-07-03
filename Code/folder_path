@@ -1,0 +1,10 @@
+
+RAW_PATH = '/content/drive/MyDrive/UIE_Project/UIEB/raw-890'
+REF_PATH = '/content/drive/MyDrive/UIE_Project/UIEB/reference-890'
+
+raw_files = sorted(os.listdir(RAW_PATH))
+ref_files = sorted(os.listdir(REF_PATH))
+
+print(f"Raw images: {len(raw_files)}")
+print(f"Reference images: {len(ref_files)}")
+print(f"Sample file name: {raw_files[0]}")
