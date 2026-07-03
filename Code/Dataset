@@ -1,0 +1,42 @@
+import torch
+from torch.utils.data import Dataset, DataLoader
+
+class UIEBDataset(Dataset):
+    def __init__(self, raw_dir, ref_dir, size=256):
+        self.raw_dir = raw_dir
+        self.ref_dir = ref_dir
+        self.size = size
+        self.files = sorted(os.listdir(raw_dir))
+
+    def __len__(self):
+        return len(self.files)
+
+    def __getitem__(self, idx):
+        # Load raw underwater image
+        raw = cv2.imread(os.path.join(self.raw_dir, self.files[idx]))
+        raw = cv2.cvtColor(raw, cv2.COLOR_BGR2RGB)
+        raw = cv2.resize(raw, (self.size, self.size))
+
+        # Load reference clean image
+        ref = cv2.imread(os.path.join(self.ref_dir, self.files[idx]))
+        ref = cv2.cvtColor(ref, cv2.COLOR_BGR2RGB)
+        ref = cv2.resize(ref, (self.size, self.size))
+
+        # Normalize and convert to tensor
+        raw = torch.FloatTensor(raw / 255.0).permute(2, 0, 1)
+        ref = torch.FloatTensor(ref / 255.0).permute(2, 0, 1)
+
+        return raw, ref
+
+# Create dataset
+dataset = UIEBDataset(RAW_PATH, REF_PATH)
+train_size = int(0.8 * len(dataset))
+val_size = len(dataset) - train_size
+
+train_set, val_set = torch.utils.data.random_split(dataset, [train_size, val_size])
+
+train_loader = DataLoader(train_set, batch_size=8, shuffle=True)
+val_loader = DataLoader(val_set, batch_size=8, shuffle=False)
+
+print(f"✅ Training images: {train_size}")
+print(f"✅ Validation images: {val_size}")
