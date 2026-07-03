@@ -1,6 +1,6 @@
-# 🌊 Underwater Image Enhancement (UIE) using CNN
+# 🌊 Underwater Image Enhancement (UIE) using Deep Learning
 
-A deep learning project to enhance degraded underwater images using a **Convolutional Neural Network (CNN)**, built on the UIEB dataset.
+A deep learning project to enhance degraded underwater images using a **U-Net with Color Attention Module**, trained on the complete UIEB dataset (890 image pairs).
 
 > Developed as part of Summer Research Internship at **NIT Karnataka, Surathkal**  
 > Under the guidance of **Dr. Jidesh P.**, Department of Mathematical and Computational Sciences
@@ -9,7 +9,7 @@ A deep learning project to enhance degraded underwater images using a **Convolut
 
 ## 📸 Sample Results
 
-| Input (Degraded) | CNN Output (Enhanced) | Reference (Clean) |
+| Input (Degraded) | U-Net Output (Enhanced) | Reference (Clean) |
 |---|---|---|
 | ![degraded](assets/degraded.png) | ![output](assets/output.png) | ![reference](assets/reference.png) |
 
@@ -23,41 +23,51 @@ Underwater images suffer from severe degradation due to light absorption and sca
 - 🟠 **Orange/Yellow** disappears next (below 5m)
 - 🔵 **Blue dominates** — images look hazy and color-distorted
 
-Our CNN model learns to **restore lost colors** and improve overall image quality.
+This project restores lost colors and improves overall image quality using deep learning.
 
 ---
 
 ## 🏗️ Model Architecture
 
-### Simple CNN (Current Implementation)
+### U-Net with Color Attention Module
 
 ```
-Input Image (3 × 256 × 256)
+Input Image (3×256×256)
         ↓
-Conv2d(3 → 32)  + ReLU
+[Encoder]
+  ConvBlock(3→32)   → MaxPool
+  ConvBlock(32→64)  → MaxPool
+  ConvBlock(64→128) → MaxPool
         ↓
-Conv2d(32 → 64) + ReLU
+[Bottleneck + Color Attention Module]
+  ConvBlock(128→256)
+  Channel-wise attention → restores lost R/G/B balance
         ↓
-Conv2d(64 → 64) + ReLU
+[Decoder with Skip Connections]
+  UpConv(256→128) + skip
+  UpConv(128→64)  + skip
+  UpConv(64→32)   + skip
         ↓
-Conv2d(64 → 32) + ReLU
-        ↓
-Conv2d(32 → 3)  + Sigmoid
-        ↓
-Output Image (3 × 256 × 256)
+Output Image (3×256×256)
 ```
 
-**Total Parameters:** 75,651
+**Key Innovation — Color Attention Module:** Learns channel-wise importance weights to selectively restore the most degraded color channels (typically red), using a squeeze-and-excitation style mechanism:
+
+```
+Attention(F) = F ⊙ σ(W₂ · ReLU(W₁ · GAP(F)))
+```
 
 ---
 
 ## 📊 Results
 
-| Model | PSNR (dB) | Dataset |
+| Model | Dataset Size | PSNR (dB) |
 |---|---|---|
-| Simple CNN (Ours) | 16.98 | UIEB (50 pairs) |
+| Simple CNN (Baseline) | 50 image pairs | 16.98 |
+| U-Net + Color Attention | 50 image pairs | 18.27 |
+| **U-Net + Color Attention (Final)** | **890 image pairs** | **22.55** ✅ |
 
-> 🔧 Work in Progress — U-Net with Color Attention Module coming next!
+> Training on the complete UIEB dataset improved PSNR by **+5.57 dB** over the initial baseline, demonstrating the importance of both architecture design (U-Net + attention) and dataset scale.
 
 ---
 
@@ -65,20 +75,14 @@ Output Image (3 × 256 × 256)
 
 | Detail | Info |
 |---|---|
-| Total Images | 890 real underwater images |
-| Paired | Yes — each image has a clean reference image |
-| Used for training | 50 matched pairs (40 train / 10 val) |
+| Total Images | 890 real underwater images (paired) |
+| Split | 756 train (85%) / 134 validation (15%) |
+| Source | Li et al., IEEE TIP 2019 |
 
 ### Download Links
-
-- 📥 **Raw Underwater Images (raw-890):**
-  [Google Drive](https://drive.google.com/drive/folders/1y5eUY-tg7mbUtZwAZcS57TbMhsfMch0V)
-
-- 📥 **Reference Clean Images (reference-890):**
-  [Google Drive](https://drive.google.com/file/d/1cA-8CzajnVEL4feBRKdBxjEe6hwql6Z7/view?usp=drivesdk)
-
-- 📄 **Original Paper:**
-  [An Underwater Image Enhancement Benchmark Dataset and Beyond (IEEE TIP 2019)](https://ieeexplore.ieee.org/document/8917818)
+- 📥 **Raw Underwater Images:** [Google Drive](https://drive.google.com/drive/folders/1y5eUY-tg7mbUtZwAZcS57TbMhsfMch0V)
+- 📥 **Reference Clean Images:** [Google Drive](https://drive.google.com/file/d/1cA-8CzajnVEL4feBRKdBxjEe6hwql6Z7/view?usp=drivesdk)
+- 📄 **Original Paper:** [An Underwater Image Enhancement Benchmark Dataset and Beyond (IEEE TIP 2019)](https://ieeexplore.ieee.org/document/8917818)
 
 ---
 
@@ -86,22 +90,18 @@ Output Image (3 × 256 × 256)
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/rathod24-code/UIE-Project.git
-cd UIE-Project
+git clone https://github.com/rathod24-code/UIE.git
+cd UIE
 ```
 
 ### 2. Install Dependencies
 ```bash
-pip install torch torchvision
-pip install opencv-python
-pip install scikit-image
-pip install matplotlib numpy
+pip install torch torchvision opencv-python scikit-image matplotlib numpy
 ```
 
 ### 3. Run on Google Colab (Recommended)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com)
 
-- Open `UIE_CNN.ipynb` in Google Colab
 - Enable GPU: Runtime → Change runtime type → **T4 GPU**
 - Mount Google Drive and set dataset paths
 - Run all cells!
@@ -111,9 +111,9 @@ pip install matplotlib numpy
 ## 💻 Project Structure
 
 ```
-UIE-Project/
-├── UIE_CNN.ipynb       ← Main training notebook (Google Colab)
-├── assets/             ← Sample result images for README
+UIE/
+├── UIE_Training.ipynb   ← Main training notebook (Colab)
+├── assets/               ← Sample result images
 │   ├── degraded.png
 │   ├── output.png
 │   └── reference.png
@@ -126,10 +126,21 @@ UIE-Project/
 
 | Concept | Description |
 |---|---|
-| **CNN** | Learns to extract and restore image features |
-| **MSE Loss** | Measures pixel-level difference between output and reference |
+| **CNN** | Extracts spatial features from images |
+| **U-Net** | Encoder-decoder with skip connections — preserves fine details |
+| **Color Attention** | Channel-wise weighting to restore lost RGB colors |
 | **PSNR** | Peak Signal-to-Noise Ratio — image quality metric (higher = better) |
-| **SSIM** | Structural Similarity Index (closer to 1 = better) |
+
+---
+
+## 📈 Loss Function
+
+```
+Total Loss = MSE Loss + 0.5 × Color Loss
+```
+
+- **MSE Loss** — pixel-level accuracy
+- **Color Loss** — channel-wise mean difference to fix color distortion
 
 ---
 
@@ -145,11 +156,21 @@ UIE-Project/
 ## 🗺️ Roadmap
 
 - [x] Simple CNN baseline
-- [x] Train on UIEB dataset  
-- [x] Evaluate PSNR score
-- [ ] U-Net with Color Attention Module
-- [ ] Train on full 890 image pairs
-- [ ] Compare with state-of-the-art methods
+- [x] U-Net with Color Attention Module
+- [x] Train on full 890 image pairs — **22.55 dB PSNR achieved**
+- [ ] Compare with state-of-the-art methods (FUnIE-GAN, etc.)
+- [ ] Add SSIM and UCIQE evaluation metrics
+- [ ] Hyperparameter tuning for further improvement
+
+---
+
+## 👨‍💻 Author
+
+**Rahul Rathod**  
+B.Tech Data Science, IISER Bhopal
+- GitHub: [@rathod24-code](https://github.com/rathod24-code)
+- LinkedIn: [linkedin.com/in/rahul-rathod77](https://linkedin.com/in/rahul-rathod77)
+- Email: rathod24@iiserb.ac.in
 
 ---
 
@@ -164,4 +185,5 @@ UIE-Project/
 ## 📄 References
 
 1. Li, C. et al. "An Underwater Image Enhancement Benchmark Dataset and Beyond." IEEE TIP, 2019.
-2. Ronneberger et al. "U-Net: Convolutional Networks for Biomedical Imag
+2. Ronneberger et al. "U-Net: Convolutional Networks for Biomedical Image Segmentation." MICCAI, 2015.
+3. Islam et al. "Fast Underwater Image Enhancement for Improved Visual Perception." IEEE RA-L, 2020.
