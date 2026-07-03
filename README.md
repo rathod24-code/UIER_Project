@@ -9,9 +9,9 @@ A deep learning project to enhance degraded underwater images using a **U-Net wi
 
 ## 📸 Sample Results
 
-| Input (Degraded) | U-Net Output (Enhanced) | Reference (Clean) |
+| Comparing Images |
 |---|---|---|
-| ![degraded](assets/degraded.png) | ![output](assets/output.png) | ![reference](assets/reference.png) |
+| ![Output](assets/Comparing.png) |  |
 
 ---
 
