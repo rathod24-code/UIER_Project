@@ -164,16 +164,6 @@ Total Loss = MSE Loss + 0.5 × Color Loss
 
 ---
 
-## 👨‍💻 Author
-
-**Rahul Rathod**  
-B.Tech Data Science, IISER Bhopal
-- GitHub: [@rathod24-code](https://github.com/rathod24-code)
-- LinkedIn: [linkedin.com/in/rahul-rathod77](https://linkedin.com/in/rahul-rathod77)
-- Email: rathod24@iiserb.ac.in
-
----
-
 ## 🙏 Acknowledgements
 
 - **Dr. Jidesh P.**, NIT Karnataka — Research Supervisor
