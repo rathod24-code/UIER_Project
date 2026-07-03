@@ -10,8 +10,7 @@ A deep learning project to enhance degraded underwater images using a **U-Net wi
 ## 📸 Sample Results
 
 | Comparing Images |
-|---|---|---|
-| ![Output](assets/Comparing.png) |  |
+| ![Output](assets/Comparing.png) |
 
 ---
 
