@@ -1,0 +1,27 @@
+model.eval()
+with torch.no_grad():
+    raw, ref = next(iter(val_loader))
+    raw = raw.to(device)
+    output = model(raw)
+
+# Show comparison
+fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+# Raw underwater
+axes[0].imshow(raw[0].cpu().permute(1,2,0))
+axes[0].set_title('Input (Degraded)')
+axes[0].axis('off')
+
+# Model output
+axes[1].imshow(output[0].cpu().permute(1,2,0))
+axes[1].set_title('Our CNN Output')
+axes[1].axis('off')
+
+# Reference
+axes[2].imshow(ref[0].permute(1,2,0))
+axes[2].set_title('Reference (Clean)')
+axes[2].axis('off')
+
+plt.tight_layout()
+plt.savefig('/content/drive/MyDrive/UIE_Project/results/result.png')
+plt.show()
